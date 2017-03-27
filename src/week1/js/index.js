@@ -4,12 +4,17 @@ class App {
   constructor() {
     this.synth = new Synth();
     this.synth.start();
-    this.connectToMouse();
+    this.connectToKeyBoard();
   }
 
   connectToMouse() {
     let element = document.getElementById("AppDiv");
     this.synth.onMouse(element);
+  }
+
+  connectToKeyBoard() {
+    let element = document.getElementById("AppDiv");
+    this.synth.onKeyDown(element);
   }
 
   changeFrequency(value) {

@@ -65,7 +65,7 @@
 	
 	    this.synth = new _synth2.default();
 	    this.synth.start();
-	    this.connectToMouse();
+	    this.connectToKeyBoard();
 	  }
 	
 	  _createClass(App, [{
@@ -73,6 +73,12 @@
 	    value: function connectToMouse() {
 	      var element = document.getElementById("AppDiv");
 	      this.synth.onMouse(element);
+	    }
+	  }, {
+	    key: "connectToKeyBoard",
+	    value: function connectToKeyBoard() {
+	      var element = document.getElementById("AppDiv");
+	      this.synth.onKeyDown(element);
 	    }
 	  }, {
 	    key: "changeFrequency",
@@ -127,6 +133,34 @@
 	        _this.osc.frequency.value = event.clientY;
 	      };
 	      object.addEventListener("mousemove", fn);
+	    }
+	  }, {
+	    key: "onKeyDown",
+	    value: function onKeyDown(object) {
+	      var _this2 = this;
+	
+	      var fn = function fn(event) {
+	        console.log(event);
+	        switch (event.key) {
+	          case "z":
+	            console.log("z");
+	            _this2.osc.frequency.value = 261.63;
+	            break;
+	          case "x":
+	            console.log("z");
+	            _this2.osc.frequency.value = 293.66;
+	            break;
+	          case "c":
+	            console.log("z");
+	            _this2.osc.frequency.value = 329.63;
+	            break;
+	          case "v":
+	            console.log("z");
+	            _this2.osc.frequency.value = 349.23;
+	            break;
+	        }
+	      };
+	      object.addEventListener("keydown", fn);
 	    }
 	  }, {
 	    key: "start",
