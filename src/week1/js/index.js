@@ -2,8 +2,21 @@ import Synth from './synth.js';
 
 class App {
   constructor() {
-    const test = new Synth();
+    this.synth = new Synth();
+    this.start();
+  }
+
+  stop() {
+    this.synth.stop();
+  }
+
+  start() {
+    this.synth.start();
+  }
+
+  changeFrequency(value) {
+    this.synth.osc.frequency.value = value;
   }
 }
 
-new App();
+window.app = new App();

@@ -49,6 +49,8 @@
 
 	'use strict';
 	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
 	var _synth = __webpack_require__(/*! ./synth.js */ 1);
 	
 	var _synth2 = _interopRequireDefault(_synth);
@@ -57,13 +59,35 @@
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var App = function App() {
-	  _classCallCheck(this, App);
+	var App = function () {
+	  function App() {
+	    _classCallCheck(this, App);
 	
-	  var test = new _synth2.default();
-	};
+	    this.synth = new _synth2.default();
+	    this.start();
+	  }
 	
-	new App();
+	  _createClass(App, [{
+	    key: 'stop',
+	    value: function stop() {
+	      this.synth.stop();
+	    }
+	  }, {
+	    key: 'start',
+	    value: function start() {
+	      this.synth.start();
+	    }
+	  }, {
+	    key: 'changeFrequency',
+	    value: function changeFrequency(value) {
+	      this.synth.osc.frequency.value = value;
+	    }
+	  }]);
+	
+	  return App;
+	}();
+	
+	window.app = new App();
 
 /***/ },
 /* 1 */
@@ -78,17 +102,34 @@
 	  value: true
 	});
 	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var Synth = function Synth() {
-	  _classCallCheck(this, Synth);
+	var Synth = function () {
+	  function Synth() {
+	    _classCallCheck(this, Synth);
 	
-	  var audioContext = window.AudioContext || window.webkitAudioContext;
-	  var con = new audioContext();
-	  var osc = con.createOscillator();
-	  osc.connect(con.destination);
-	  //osc.start();
-	};
+	    var audioContext = window.AudioContext || window.webkitAudioContext;
+	    var con = new audioContext();
+	    this.osc = con.createOscillator();
+	    this.osc.connect(con.destination);
+	  }
+	
+	  _createClass(Synth, [{
+	    key: "start",
+	    value: function start() {
+	      this.osc.start();
+	    }
+	  }, {
+	    key: "stop",
+	    value: function stop() {
+	      this.ocs.stop();
+	    }
+	  }]);
+	
+	  return Synth;
+	}();
 	
 	exports.default = Synth;
 

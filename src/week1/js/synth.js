@@ -2,9 +2,16 @@ class Synth {
   constructor() {
     let audioContext = window.AudioContext || window.webkitAudioContext;
     let con = new audioContext();
-    let osc = con.createOscillator();
-    osc.connect(con.destination);
-    //osc.start();
+    this.osc = con.createOscillator();
+    this.osc.connect(con.destination);
+  }
+
+  start() {
+    this.osc.start();
+  }
+
+  stop() {
+    this.ocs.stop();
   }
 }
 
