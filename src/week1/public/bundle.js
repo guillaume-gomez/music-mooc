@@ -47,7 +47,7 @@
   \*******************************/
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	"use strict";
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
@@ -64,23 +64,25 @@
 	    _classCallCheck(this, App);
 	
 	    this.synth = new _synth2.default();
-	    this.start();
+	    this.synth.start();
+	    this.connectToMouse();
 	  }
 	
 	  _createClass(App, [{
-	    key: 'stop',
-	    value: function stop() {
-	      this.synth.stop();
+	    key: "connectToMouse",
+	    value: function connectToMouse() {
+	      var element = document.getElementById("AppDiv");
+	      this.synth.onMouse(element);
 	    }
 	  }, {
-	    key: 'start',
-	    value: function start() {
-	      this.synth.start();
-	    }
-	  }, {
-	    key: 'changeFrequency',
+	    key: "changeFrequency",
 	    value: function changeFrequency(value) {
 	      this.synth.osc.frequency.value = value;
+	    }
+	  }, {
+	    key: "synth",
+	    value: function synth() {
+	      return this.synth;
 	    }
 	  }]);
 	
@@ -117,6 +119,16 @@
 	  }
 	
 	  _createClass(Synth, [{
+	    key: "onMouse",
+	    value: function onMouse(object) {
+	      var _this = this;
+	
+	      var fn = function fn(event) {
+	        _this.osc.frequency.value = event.clientY;
+	      };
+	      object.addEventListener("mousemove", fn);
+	    }
+	  }, {
 	    key: "start",
 	    value: function start() {
 	      this.osc.start();

@@ -6,6 +6,13 @@ class Synth {
     this.osc.connect(con.destination);
   }
 
+  onMouse(object) {
+    const fn = (event) => {
+      this.osc.frequency.value = event.clientY;
+    }
+    object.addEventListener("mousemove", fn); 
+  }
+
   start() {
     this.osc.start();
   }

@@ -3,19 +3,21 @@ import Synth from './synth.js';
 class App {
   constructor() {
     this.synth = new Synth();
-    this.start();
-  }
-
-  stop() {
-    this.synth.stop();
-  }
-
-  start() {
     this.synth.start();
+    this.connectToMouse();
+  }
+
+  connectToMouse() {
+    let element = document.getElementById("AppDiv");
+    this.synth.onMouse(element);
   }
 
   changeFrequency(value) {
     this.synth.osc.frequency.value = value;
+  }
+
+  synth() {
+    return this.synth;
   }
 }
 
