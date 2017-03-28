@@ -1,21 +1,23 @@
-class Synth {
+import Base from './base';
+
+class Synth extends Base{
   constructor() {
+    super();
     let audioContext = window.AudioContext || window.webkitAudioContext;
     let con = new audioContext();
     this.osc = con.createOscillator();
     this.osc.connect(con.destination);
   }
 
-  onMouse(object) {
+  connectToMouse(object) {
     const fn = (event) => {
       this.osc.frequency.value = event.clientY;
     }
-    object.addEventListener("mousemove", fn);
+    this.onMouse(object, fn)
   }
 
-  onKeyDown(object) {
+  connectToKeyboard(object) {
     const fn = (event) => {
-      console.log(event)
       switch(event.key) {
         case "z":
           console.log("z")
@@ -35,7 +37,7 @@ class Synth {
         break;
       }
     }
-    object.addEventListener("keydown", fn);
+    this.onKeyDown(object, fn);
   }
 
   start() {

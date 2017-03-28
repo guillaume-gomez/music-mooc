@@ -4,26 +4,10 @@ class App {
   constructor() {
     this.synth = new Synth();
     this.synth.start();
-    this.connectToKeyBoard();
-  }
 
-  connectToMouse() {
-    let element = document.getElementById("AppDiv");
-    this.synth.onMouse(element);
-  }
-
-  connectToKeyBoard() {
     let element = document.getElementById("AppDiv");
     element.setAttribute("tabIndex",1);
-    this.synth.onKeyDown(element);
-  }
-
-  changeFrequency(value) {
-    this.synth.osc.frequency.value = value;
-  }
-
-  synth() {
-    return this.synth;
+    this.synth.connectToKeyboard(element);
   }
 }
 
