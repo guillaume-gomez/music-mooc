@@ -78,6 +78,7 @@
 	    key: "connectToKeyBoard",
 	    value: function connectToKeyBoard() {
 	      var element = document.getElementById("AppDiv");
+	      element.setAttribute("tabIndex", 1);
 	      this.synth.onKeyDown(element);
 	    }
 	  }, {

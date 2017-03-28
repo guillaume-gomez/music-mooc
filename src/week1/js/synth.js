@@ -10,7 +10,7 @@ class Synth {
     const fn = (event) => {
       this.osc.frequency.value = event.clientY;
     }
-    object.addEventListener("mousemove", fn); 
+    object.addEventListener("mousemove", fn);
   }
 
   onKeyDown(object) {

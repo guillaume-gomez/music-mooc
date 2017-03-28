@@ -14,6 +14,7 @@ class App {
 
   connectToKeyBoard() {
     let element = document.getElementById("AppDiv");
+    element.setAttribute("tabIndex",1);
     this.synth.onKeyDown(element);
   }
 
