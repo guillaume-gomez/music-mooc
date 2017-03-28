@@ -20,19 +20,15 @@ class Synth extends Base{
     const fn = (event) => {
       switch(event.key) {
         case "z":
-          console.log("z")
           this.osc.frequency.value = 261.63;
         break;
         case "x":
-          console.log("z")
           this.osc.frequency.value = 293.66;
         break;
         case "c":
-          console.log("z")
           this.osc.frequency.value = 329.63;
         break;
         case "v":
-          console.log("z")
           this.osc.frequency.value = 349.23;
         break;
       }
