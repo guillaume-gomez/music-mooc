@@ -3,10 +3,8 @@ import Base from './base';
 class Synth extends Base{
   constructor() {
     super();
-    let audioContext = window.AudioContext || window.webkitAudioContext;
-    let con = new audioContext();
-    this.osc = con.createOscillator();
-    this.osc.connect(con.destination);
+    this.osc = this.con.createOscillator();
+    this.osc.connect(this.con.destination);
   }
 
   connectToMouse(object) {
@@ -32,6 +30,25 @@ class Synth extends Base{
           this.osc.frequency.value = 349.23;
         break;
       }
+    }
+    this.onKeyDown(object, fn);
+  }
+
+  // using enveloppes version
+  playSynth(object) {
+    const fn = (event) => {
+      let osc = this.con.createOscillator();
+      let amp = this.con.createGain();
+      let now =  this.con.currentTime;
+      amp.gain.value = 0;
+      amp.gain.linearRampToValueAtTime(0.1, now + 2);
+      amp.gain.linearRampToValueAtTime(0, now + 4);
+      osc.frequency.value = Math.random() * 500;
+      osc.connect(amp);
+      osc.type = 'sine'
+      amp.connect(this.con.destination);
+      osc.start();
+      osc.stop(now + 4.1);
     }
     this.onKeyDown(object, fn);
   }

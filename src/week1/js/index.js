@@ -1,14 +1,27 @@
 import Synth from './synth.js';
+import LFO from "./lfo.js";
 
 class App {
   constructor() {
     this.synth = new Synth();
-    this.synth.start();
+    this.lfo = new LFO();
 
-    let element = document.getElementById("AppDiv");
-    element.setAttribute("tabIndex",1);
-    this.synth.connectToKeyboard(element);
+    this.element = document.getElementById("AppDiv");
+    this.element.setAttribute("tabIndex",1);
   }
+
+
+  lfoExample() {
+    this.lfo.start();
+    this.lfo.connectToMouse(this.element);
+  }
+
+  usingEnvelopes() {
+    this.synth.playSynth(this.element);
+  }
+
+
 }
 
 window.app = new App();
+window.app.lfoExample();

@@ -39,7 +39,7 @@
       osc.connect(amp);
       osc.type = 'square'
       amp.connect(con.destination);
-                osc.start()
+      osc.start()
     }
     object.addEventListener("keydown", fn);
   }

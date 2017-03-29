@@ -2,6 +2,8 @@ class Base {
 
   constructor() {
     //nothing to do
+    let audioContext = window.AudioContext || window.webkitAudioContext;
+    this.con = new audioContext();
   }
 
   onMouse(object, fn) {
