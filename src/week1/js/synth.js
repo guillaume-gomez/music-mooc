@@ -4,7 +4,10 @@ class Synth extends Base{
   constructor() {
     super();
     this.osc = this.con.createOscillator();
-    this.osc.connect(this.con.destination);
+  }
+
+  connect(destination) {
+    this.osc.connect(destination);
   }
 
   connectToMouse(object) {
@@ -32,6 +35,18 @@ class Synth extends Base{
       }
     }
     this.onKeyDown(object, fn);
+  }
+
+  addFilter(object) {
+    let filter = this.con.createBiquadFilter();
+    this.connect(filter);
+    filter.connect(this.con.destination);
+
+    const fn = (event) => {
+      filter.frequency.value = event.clientX * 10;
+      filter.Q.value = event.clientY / 10;
+    };
+    this.onMouse(object, fn);
   }
 
   // using enveloppes version

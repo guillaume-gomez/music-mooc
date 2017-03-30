@@ -20,8 +20,17 @@ class App {
     this.synth.playSynth(this.element);
   }
 
+  filteredSynth() {
+
+    this.synth.osc.frequency.value = 600;
+    this.synth.osc.type = "sawtooth";
+    this.synth.addFilter(this.element);
+    this.synth.connectToKeyboard(this.element)
+    this.synth.start();
+  }
+
 
 }
 
 window.app = new App();
-window.app.lfoExample();
+window.app.filteredSynth();

@@ -85,13 +85,23 @@
 	    value: function usingEnvelopes() {
 	      this.synth.playSynth(this.element);
 	    }
+	  }, {
+	    key: "filteredSynth",
+	    value: function filteredSynth() {
+	
+	      this.synth.osc.frequency.value = 600;
+	      this.synth.osc.type = "sawtooth";
+	      this.synth.addFilter(this.element);
+	      this.synth.connectToKeyboard(this.element);
+	      this.synth.start();
+	    }
 	  }]);
 	
 	  return App;
 	}();
 	
 	window.app = new App();
-	window.app.lfoExample();
+	window.app.filteredSynth();
 
 /***/ },
 /* 1 */
@@ -129,11 +139,15 @@
 	    var _this = _possibleConstructorReturn(this, (Synth.__proto__ || Object.getPrototypeOf(Synth)).call(this));
 	
 	    _this.osc = _this.con.createOscillator();
-	    _this.osc.connect(_this.con.destination);
 	    return _this;
 	  }
 	
 	  _createClass(Synth, [{
+	    key: "connect",
+	    value: function connect(destination) {
+	      this.osc.connect(destination);
+	    }
+	  }, {
 	    key: "connectToMouse",
 	    value: function connectToMouse(object) {
 	      var _this2 = this;
@@ -165,6 +179,19 @@
 	        }
 	      };
 	      this.onKeyDown(object, fn);
+	    }
+	  }, {
+	    key: "addFilter",
+	    value: function addFilter(object) {
+	      var filter = this.con.createBiquadFilter();
+	      this.connect(filter);
+	      filter.connect(this.con.destination);
+	
+	      var fn = function fn(event) {
+	        filter.frequency.value = event.clientX * 10;
+	        filter.Q.value = event.clientY / 10;
+	      };
+	      this.onMouse(object, fn);
 	    }
 	
 	    // using enveloppes version
