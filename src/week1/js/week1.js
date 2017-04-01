@@ -1,7 +1,6 @@
 
-  const audio_context = window.AudioContext || window.webkitAudioContext
-
-  const con = new audio_context()
+const audio_context = window.AudioContext || window.webkitAudioContext
+const con = new audio_context()
 
   export function connectToMouse(object, osc) {
     const fn = (event) => {
@@ -41,6 +40,18 @@
       amp.connect(con.destination);
       osc.start()
     }
+    object.addEventListener("keydown", fn);
+  }
+
+  export function addFilter(object, osc) {
+    let filter = con.createBiquadFilter();
+    osc.connect(filter);
+    filter.connect(con.destination);
+
+    const fn = (event) => {
+      filter.frequency.value = event.clientX * 10;
+      filter.Q.value = event.clientY / 10;
+    };
     object.addEventListener("keydown", fn);
   }
 
