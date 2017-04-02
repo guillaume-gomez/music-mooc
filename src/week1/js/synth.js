@@ -58,12 +58,12 @@ class Synth extends Base{
       amp.gain.value = 0;
       amp.gain.linearRampToValueAtTime(0.1, now + 2);
       amp.gain.linearRampToValueAtTime(0, now + 4);
-      osc.frequency.value = Math.random() * 500;
-      osc.connect(amp);
-      osc.type = 'sine'
+      this.osc.frequency.value = Math.random() * 500;
+      this.connect(amp);
+      this.osc.type = 'sine'
       amp.connect(this.con.destination);
-      osc.start();
-      osc.stop(now + 4.1);
+      this.osc.start();
+      this.osc.stop(now + 4.1);
     }
     this.onKeyDown(object, fn);
   }

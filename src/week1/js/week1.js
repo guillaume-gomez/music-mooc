@@ -1,6 +1,7 @@
 
-const audio_context = window.AudioContext || window.webkitAudioContext
-const con = new audio_context()
+  const audio_context = window.AudioContext || window.webkitAudioContext;
+
+  export const con = new audio_context();
 
   export function connectToMouse(object, osc) {
     const fn = (event) => {
