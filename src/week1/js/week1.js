@@ -32,14 +32,18 @@
 
   export function playSynth(object) {
     const fn = (event) => {
-      let amp = con.createGain();
       let osc = con.createOscillator();
-      amp.gain.value = 0.05;
+      let amp = con.createGain();
+      let now =  con.currentTime;
+      amp.gain.value = 0;
+      amp.gain.linearRampToValueAtTime(0.1, now + 2);
+      amp.gain.linearRampToValueAtTime(0, now + 4);
       osc.frequency.value = Math.random() * 500;
       osc.connect(amp);
-      osc.type = 'square'
+      osc.type = 'sine'
       amp.connect(con.destination);
-      osc.start()
+      osc.start();
+      osc.stop(now + 4.1);
     }
     object.addEventListener("keydown", fn);
   }
