@@ -60,3 +60,17 @@ export function connnectToUi() {
     nx.widgets.keyboard1.on('*', keyboardChanged);
   };
 }
+
+export connectTilt() {
+  let osc = con.createOscillator();
+  osc.connect(con.destination);
+  osc.start();
+
+  const tiltChanged = (data) => {
+    osc.frequency.value = data.x * 500;
+  };
+
+  nx.onload = () => {
+    nx.widgets.tilt.on("*", tiltChanged);
+  }
+}
