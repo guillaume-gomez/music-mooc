@@ -29,10 +29,27 @@ export function connectToKeyboard(object, osc) {
   object.addEventListener("keydown", fn);
 }
 
-export function connnectSliderToUi() {
+export function connnectToUi() {
   let osc = con.createOscillator();
   osc.connect(con.destination);
   osc.start();
+
+  const midiToFreq = (midiValue) => {
+    const midiToFreq = {
+      60: 261.63,
+      61: 277.18,
+      62: 293.66,
+      63: 311.13
+    };
+    if(!midiToFreq[midiValue]) {
+      return midiToFreq[60];
+    }
+    return midiToFreq[midiValue]
+  }
+
+  const keyboardChanged = (data) => {
+    osc.frequency.value = midiToFreq(data.note);
+  }
 
   const slider1Changed = (data) => {
     osc.frequency.value = data.value;
@@ -40,5 +57,6 @@ export function connnectSliderToUi() {
   //on page loaded
   nx.onload = () => {
     nx.widgets.slider1.on('*', slider1Changed);
+    nx.widgets.keyboard1.on('*', keyboardChanged);
   };
 }

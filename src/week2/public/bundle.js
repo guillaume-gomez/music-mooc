@@ -56,7 +56,7 @@
 	var App = function App() {
 	  _classCallCheck(this, App);
 	
-	  (0, _week.connnectSliderToUi)();
+	  (0, _week.connnectToUi)();
 	};
 	
 	window.app = new App();
@@ -75,7 +75,7 @@
 	});
 	exports.connectToMouse = connectToMouse;
 	exports.connectToKeyboard = connectToKeyboard;
-	exports.connnectSliderToUi = connnectSliderToUi;
+	exports.connnectToUi = connnectToUi;
 	var audio_context = window.AudioContext || window.webkitAudioContext;
 	
 	var con = exports.con = new audio_context();
@@ -107,10 +107,27 @@
 	  object.addEventListener("keydown", fn);
 	}
 	
-	function connnectSliderToUi() {
+	function connnectToUi() {
 	  var osc = con.createOscillator();
 	  osc.connect(con.destination);
 	  osc.start();
+	
+	  var midiToFreq = function midiToFreq(midiValue) {
+	    var midiToFreq = {
+	      60: 261.63,
+	      61: 277.18,
+	      62: 293.66,
+	      63: 311.13
+	    };
+	    if (!midiToFreq[midiValue]) {
+	      return midiToFreq[60];
+	    }
+	    return midiToFreq[midiValue];
+	  };
+	
+	  var keyboardChanged = function keyboardChanged(data) {
+	    osc.frequency.value = midiToFreq(data.note);
+	  };
 	
 	  var slider1Changed = function slider1Changed(data) {
 	    osc.frequency.value = data.value;
@@ -118,6 +135,7 @@
 	  //on page loaded
 	  nx.onload = function () {
 	    nx.widgets.slider1.on('*', slider1Changed);
+	    nx.widgets.keyboard1.on('*', keyboardChanged);
 	  };
 	}
 
