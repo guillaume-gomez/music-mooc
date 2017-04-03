@@ -21,7 +21,6 @@ class App {
   }
 
   filteredSynth() {
-
     this.synth.osc.frequency.value = 600;
     this.synth.osc.type = "sawtooth";
     this.synth.addFilter(this.element);
