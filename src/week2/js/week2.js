@@ -28,3 +28,17 @@ export function connectToKeyboard(object, osc) {
   }
   object.addEventListener("keydown", fn);
 }
+
+export function connnectSliderToUi() {
+  let osc = con.createOscillator();
+  osc.connect(con.destination);
+  osc.start();
+
+  const slider1Changed = (data) => {
+    osc.frequency.value = data.value;
+  }
+  //on page loaded
+  nx.onload = () => {
+    nx.widgets.slider1.on('*', slider1Changed);
+  };
+}
