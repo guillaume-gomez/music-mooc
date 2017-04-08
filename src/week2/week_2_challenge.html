@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <title>Week 2 Challenge</title>
+  <script src="../assets/nexusUI.js"></script>
+</head>
+  <body>
+    <h1 class="well"> Guillaume Gomez submission</h1>
+    <div class="row">
+      <div class="col-md-8">
+        <canvas id="on_off" nx="toggle"></canvas>
+         <canvas id="slidder1" nx="slider"></canvas>
+        <canvas id="keyboard1" nx="keyboard"></canvas>
+      </div>
+    </div>
+  </body>
+  <script>
+    var audio_context = window.AudioContext || window.webkitAudioContext;
+    var con = new audio_context();
+
+    // var osc = con.createOscillator();
+    // var lfo = con.createOscillator();
+
+    // var lfo_amp = con.createGain();
+    // lfo_amp.gain.value = 200;
+
+    // osc.frequency.value = 300;
+    // lfo.frequency.value = 15;
+
+    // lfo.connect(lfo_amp);
+    // lfo_amp.connect(osc.frequency);
+    // osc.connect(con.destination);
+
+    // osc.start();
+    // lfo.start();
+
+    // Encapsulate an oscillator
+    Oscillator = function(destination) {
+        this.oscillator = null;
+        this.createOscillator = function() {
+           this.oscillator = con.createOscillator();
+           this.oscillator.connect(destination);
+        }
+
+        this.start = function () {
+          this.oscillator.start();
+        }
+
+        this.stop = function() {
+          this.oscillator.stop();
+          this.createOscillator(destination);
+        }
+
+        this.ocs = function() {
+          return this.oscillator;
+        }
+    }
+
+    connnectToUi = function () {
+      let oscillator = new Oscillator(con.destination);
+      oscillator.createOscillator();
+
+      const midiToFreq = (midiValue) => {
+        const midiToFreq = {
+          48: 130.8127826503,
+          49: 138.5913154884,
+          50: 146.8323839587,
+          51: 155.5634918610,
+          52: 164.8137784564,
+          53: 174.6141157165,
+          54: 184.9972113558,
+          55: 195.9977179909,
+          56: 207.6523487900,
+          57: 220.0000000000,
+          58: 233.0818807590,
+          59: 246.9416506281,
+          60: 261.6255653006,
+          61: 277.1826309769,
+          62: 293.6647679174,
+          63: 311.1269837221,
+          64: 329.6275569129,
+          65: 349.2282314330,
+          66: 369.9944227116,
+          67: 391.9954359817,
+          68: 415.3046975799,
+          69: 440.0000000000,
+          70: 466.1637615181,
+          71: 493.8833012561,
+          72: 523.2511306012,
+          73: 554.3652619537,
+          74: 587.3295358348,
+          75: 622.2539674442,
+          76: 659.2551138257,
+          77: 698.4564628660,
+          78: 739.9888454233,
+          79: 783.9908719635,
+          80: 830.6093951599,
+          81: 880.0000000000,
+          82: 932.3275230362,
+          83: 987.7666025122,
+        };
+        if(!midiToFreq[midiValue]) {
+          return midiToFreq[48];
+        }
+        return midiToFreq[midiValue]
+      }
+
+      const keyboardChanged = (data) => {
+        console.log(data.note)
+        oscillator.ocs().frequency.value = midiToFreq(data.note);
+      }
+      const onOffOsc = (data) => {
+        data.value === 1 ? oscillator.start() : oscillator.stop();
+      }
+
+      //on page loaded
+      nx.onload = () => {
+        nx.widgets.keyboard1.on('*', keyboardChanged);
+        nx.widgets.on_off.on('*', onOffOsc);
+      };
+    }
+    connnectToUi();
+  </script>
+</html>
