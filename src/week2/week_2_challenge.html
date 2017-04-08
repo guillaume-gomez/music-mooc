@@ -221,6 +221,7 @@
           oscillator.start()
         } else {
           oscillator.stop();
+          oscillator.ocs().connect(analyser);
           graph.cleanUp();
         }
       }
