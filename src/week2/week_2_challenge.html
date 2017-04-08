@@ -2,21 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
   <title>Week 2 Challenge</title>
   <script src="../assets/nexusUI.js"></script>
 </head>
   <body>
-    <h1 class="well"> Guillaume Gomez submission</h1>
-    <div class="row">
-      <div class="col-md-8">
-        <canvas id="on_off" nx="toggle"></canvas>
-         <canvas id="slidder1" nx="slider"></canvas>
-        <canvas id="keyboard1" nx="keyboard"></canvas>
+    <div class="container">
+      <h1 class="well"> Guillaume Gomez submission</h1>
+      <div class="row">
+        <div class="col-sm-7">
+
+          <div class="card">
+           <h3 class="card-header">Oscillator</h3>
+            <div class="card-block">
+              <div class="row">
+                <div class="col-sm-2" style="border-right: solid 3px #e8e8ea;">
+                  <label> ON/OFF</label>
+                  <canvas id="on_off" nx="toggle"></canvas>
+                </div>
+                <div class="col-sm-10">
+                  <canvas id="slidder1" nx="slider"></canvas>
+                  <canvas id="keyboard1" nx="keyboard"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-7">
+          <div class="card">
+           <h3 class="card-header">Analyser</h3>
+            <div class="card-block">
+              <div class="row">
+                <div class="col-sm-10">
+                  <canvas id="analyser"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </body>
-  <script>
+
+<script>
     var audio_context = window.AudioContext || window.webkitAudioContext;
     var con = new audio_context();
 
@@ -58,9 +89,61 @@
         }
     }
 
+    Analyser = function(source) {
+      this.width = 400;
+      this.height = 200;
+      this.canvasCtx = document.getElementById('analyser').getContext('2d');
+      this.dataArray = null;
+      this.bufferSize = null;
+
+      this.conf = 10;
+
+      this.initAnalyser = (analyser) => {
+        analyser.fftSize = 256;
+        this.bufferSize = analyser.frequencyBinCount;
+        console.log(this.bufferSize);
+        this.dataArray = new Uint8Array(this.bufferSize);
+        this.canvasCtx.clearRect(0, 0, this.width, this.height);
+      }
+
+      this.drawer = (analyser) => {
+        draw = requestAnimationFrame(
+            () => {
+              this.drawer(analyser);
+            }
+        );
+        analyser.getByteFrequencyData(this.dataArray);
+
+        this.cleanUp();
+
+        let largeurBarre = (this.width / this.bufferSize) * this.conf;
+        let hauteurBarre;
+        let x = 0;
+
+        for(let i = 0; i < this.bufferSize; i++) {
+          hauteurBarre = this.dataArray[ i ];
+          console.log(hauteurBarre)
+          this.canvasCtx.fillStyle = 'rgb(' + (hauteurBarre  * 0.8 + 100) + ',50,50)';
+          this.canvasCtx.fillRect(x,this.height - hauteurBarre / 2, largeurBarre, hauteurBarre);
+
+          x += largeurBarre + 1;
+        }
+      }
+
+      this.cleanUp = () => {
+        this.canvasCtx.fillStyle = 'rgb(255, 255, 255)';
+        this.canvasCtx.fillRect(0, 0, this.width, this.height);
+      }
+    }
+
     connnectToUi = function () {
       let oscillator = new Oscillator(con.destination);
       oscillator.createOscillator();
+      let analyser = con.createAnalyser();
+      oscillator.ocs().connect(analyser);
+      let graph = new Analyser(oscillator.ocs());
+      graph.initAnalyser(analyser);
+      graph.drawer(analyser);
 
       const midiToFreq = (midiValue) => {
         const midiToFreq = {
@@ -108,19 +191,19 @@
       }
 
       const keyboardChanged = (data) => {
-        console.log(data.note)
         oscillator.ocs().frequency.value = midiToFreq(data.note);
       }
       const onOffOsc = (data) => {
         data.value === 1 ? oscillator.start() : oscillator.stop();
       }
-
       //on page loaded
       nx.onload = () => {
         nx.widgets.keyboard1.on('*', keyboardChanged);
         nx.widgets.on_off.on('*', onOffOsc);
       };
     }
+
+
     connnectToUi();
   </script>
 </html>
