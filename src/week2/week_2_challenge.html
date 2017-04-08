@@ -90,7 +90,7 @@
     }
 
     Analyser = function(source) {
-      this.width = 400;
+      this.width = 500;
       this.height = 200;
       this.canvasCtx = document.getElementById('analyser').getContext('2d');
       this.dataArray = null;
@@ -101,7 +101,6 @@
       this.initAnalyser = (analyser) => {
         analyser.fftSize = 256;
         this.bufferSize = analyser.frequencyBinCount;
-        console.log(this.bufferSize);
         this.dataArray = new Uint8Array(this.bufferSize);
         this.canvasCtx.clearRect(0, 0, this.width, this.height);
       }
@@ -116,17 +115,16 @@
 
         this.cleanUp();
 
-        let largeurBarre = (this.width / this.bufferSize) * this.conf;
-        let hauteurBarre;
+        let barWidth = (this.width / this.bufferSize) * this.conf;
+        let barHeight;
         let x = 0;
 
         for(let i = 0; i < this.bufferSize; i++) {
-          hauteurBarre = this.dataArray[ i ];
-          console.log(hauteurBarre)
-          this.canvasCtx.fillStyle = 'rgb(' + (hauteurBarre  * 0.8 + 100) + ',50,50)';
-          this.canvasCtx.fillRect(x,this.height - hauteurBarre / 2, largeurBarre, hauteurBarre);
+          barHeight = this.dataArray[ i ];
+          this.canvasCtx.fillStyle = 'rgb(56,'+(barHeight + 150)+',60)';
+          this.canvasCtx.fillRect(x,this.height - barHeight / 2, barWidth, barHeight);
 
-          x += largeurBarre + 1;
+          x += barWidth + 1;
         }
       }
 
@@ -194,7 +192,12 @@
         oscillator.ocs().frequency.value = midiToFreq(data.note);
       }
       const onOffOsc = (data) => {
-        data.value === 1 ? oscillator.start() : oscillator.stop();
+        if(data.value === 1) {
+          oscillator.start()
+        } else {
+          oscillator.stop();
+          graph.cleanUp();
+        }
       }
       //on page loaded
       nx.onload = () => {
