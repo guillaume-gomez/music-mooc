@@ -22,7 +22,7 @@
                   <canvas id="on_off" nx="toggle"></canvas>
                 </div>
                 <div class="col-sm-10">
-                  <canvas id="slidder1" nx="slider"></canvas>
+                  <canvas id="slidder1" nx="slider" min="100" max="1000"></canvas>
                   <canvas id="keyboard1" nx="keyboard"></canvas>
                 </div>
               </div>
@@ -121,7 +121,7 @@
 
         for(let i = 0; i < this.bufferSize; i++) {
           barHeight = this.dataArray[ i ];
-          this.canvasCtx.fillStyle = 'rgb(56,'+(barHeight + 150)+',60)';
+          this.canvasCtx.fillStyle = 'rgb(56,'+(barHeight + 50)+',60)';
           this.canvasCtx.fillRect(x,this.height - barHeight / 2, barWidth, barHeight);
 
           x += barWidth + 1;
@@ -190,6 +190,7 @@
 
       const keyboardChanged = (data) => {
         oscillator.ocs().frequency.value = midiToFreq(data.note);
+        nx.widgets.slidder1.set({value: midiToFreq(data.note)}, true);
       }
       const onOffOsc = (data) => {
         if(data.value === 1) {
@@ -199,10 +200,14 @@
           graph.cleanUp();
         }
       }
+      const sliderChanged = (data) => {
+        oscillator.ocs().frequency.value = data.value;
+      }
       //on page loaded
       nx.onload = () => {
         nx.widgets.keyboard1.on('*', keyboardChanged);
         nx.widgets.on_off.on('*', onOffOsc);
+        nx.widgets.slidder1.on("*", sliderChanged);
       };
     }
 
