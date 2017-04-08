@@ -45,7 +45,16 @@
            <h3 class="card-header">LFO</h3>
             <div class="card-block">
               <div class="row">
-                
+                <div class="col-sm-6">
+                  <canvas id="gainlfo" nx="dial"  min="0" max="500"></canvas>
+                  <br>
+                  <p class="text-center">gain</p>
+                </div>
+                <div class="col-sm-6">
+                  <canvas id="freqlfo" nx="dial"  min="0" max="1000"></canvas>
+                  <br/>
+                  <p class="text-center">LFO frequency</p>
+                </div>
               </div>
             </div>
           </div>
@@ -72,22 +81,6 @@
 <script>
     var audio_context = window.AudioContext || window.webkitAudioContext;
     var con = new audio_context();
-
-    // var osc = con.createOscillator();
-    // var lfo = con.createOscillator();
-
-    // var lfo_amp = con.createGain();
-    // lfo_amp.gain.value = 200;
-
-    // osc.frequency.value = 300;
-    // lfo.frequency.value = 15;
-
-    // lfo.connect(lfo_amp);
-    // lfo_amp.connect(osc.frequency);
-    // osc.connect(con.destination);
-
-    // osc.start();
-    // lfo.start();
 
     // Encapsulate an oscillator
     Oscillator = function(destination) {
@@ -161,9 +154,18 @@
       oscillator.createOscillator();
       let analyser = con.createAnalyser();
       oscillator.ocs().connect(analyser);
+      let lfo = con.createOscillator();
+      let lfo_amp = con.createGain();
+      //lfo_amp.gain.value = 200;
+
+      lfo.connect(lfo_amp);
+      lfo_amp.connect(oscillator.ocs().frequency);
+
       let graph = new Analyser(oscillator.ocs());
       graph.initAnalyser(analyser);
       graph.drawer(analyser);
+
+      lfo.start();
 
       const midiToFreq = (midiValue) => {
         const midiToFreq = {
@@ -234,11 +236,21 @@
         }
         selectTag.addEventListener("change", fun);
       }
+
+      const gainlfoChanged = (data) => {
+        lfo_amp.gain.value = data.value;
+      }
+
+      const lfoFrequencyChanged = (data) => {
+        lfo.frequency.value = data.value;
+      }
       //on page loaded
       nx.onload = () => {
         nx.widgets.keyboard1.on('*', keyboardChanged);
         nx.widgets.on_off.on('*', onOffOsc);
         nx.widgets.slidder1.on("*", sliderChanged);
+        nx.widgets.gainlfo.on("*", gainlfoChanged);
+        nx.widgets.freqlfo.on("*", lfoFrequencyChanged);
         initSelectType();
 
       };
