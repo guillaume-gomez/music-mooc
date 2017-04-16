@@ -20,16 +20,16 @@
             <div class="card-block">
               <div class="row">
                 <div class="col-md-10">
-                  <canvas id="matrix" nx="matrix" width="400"></canvas>
+                  <canvas id="matrix" nx="matrix" width="600"></canvas>
                 </div>
                 <div class="col-sm-2" style="border-left: solid 3px #e8e8ea;">
-                  
+                  <canvas id="matrix_width" nx="slider" min=5 max=20 range=1></canvas>
                 </div>
                 <div class="col-sm-12">
                   <hr/>
-                  <canvas id="volume_hat_dial" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_1" nx="dial"  min="0" max="100"></canvas>
                   <label>Label Hat</label>
-                  <canvas id="volume_snare_dial" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_2" nx="dial"  min="0" max="100"></canvas>
                 </div>
               </div>
             </div>
@@ -63,45 +63,41 @@
     var src_path = "../assets/src/";
 
     var sounds = [];
-    var volume_hat = 0;
-    var volume_snare = 0;
-
-    var seq = [
-        [0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0]
-    ];
+    var volumes = [0, 0];
+    var MaxSounds = 2;
+    var seq = [];
 
 
     var step = 0;
     var interval = 0.125;
     var matrix;
-    var volume_hat_dial;
-    var volume_snare_dial;
-    var bpm_ui;
-    debugger
+
     nx.onload = function(){
-        matrix.col = seq[0].length;
-        matrix.row = seq.length;
-        matrix.init();
+        setMaxtrixArray(9);
 
         matrix.on('*', function(data) {
             if (data.row !== undefined) {
                 seq[data.row][data.col] = data.level;
             }
         });
-
-        volume_hat_dial.on('*',function(data) {
-            volume_hat = data.value / 100;
-        });
-
-        volume_snare_dial.on('*',function(data) {
-            volume_snare = data.value / 100;
-        });
-
-        bpm_ui.on('*', function(data) {
+        //init volumes handler
+        function generateHandler(index) {
+          return function(data) {
+            volumes[index] = data.value / 100;
+          }
+        }
+        for(var i = 0; i < MaxSounds; i++) {
+          nx.widgets["volume_ui_"+(i + 1)].on('*', generateHandler(i));
+        }
+        nx.widgets.bpm_ui.on('*', function(data) {
           interval = data.value / 1000;
         });
+
+        nx.widgets.matrix_width.on('*', function(data) {
+          //setMatrixArray(data.value);
+        })
     };
+
 
 
     loadSample(src_path + '001_drum1.wav', function (buffer){
@@ -122,6 +118,21 @@
         player.connect (volume);
         volume.connect(con.destination);
         player.start(time);
+    }
+
+    function setMaxtrixArray(width) {
+      var newSeq = [];
+      // init sequences
+      for(var i = 0; i < MaxSounds; i++) {
+        newSeq[i] = [];
+        for(var j = 0; j < width; j++) {
+          newSeq[i][j] = 0;
+        }
+      }
+      seq = newSeq.slice();
+      matrix.col = seq[0].length;
+      matrix.row = seq.length;
+      matrix.init();
     }
 
 
@@ -148,13 +159,13 @@
         }
 
         while (now <= max_future_time){
-            step ++;
+            step++;
             if (seq[0][step % seq[0].length]){
-                playSound(sounds[0], now, volume_hat);
+                playSound(sounds[0], now, volumes[0]);
             }
 
             if (seq[1][step % seq[1].length]){
-                playSound(sounds[1], now, volume_snare);
+                playSound(sounds[1], now, volumes[1]);
             }
 
             now += interval ;
@@ -177,5 +188,8 @@
         };
         request.send();
     }
+
+
+
 </script>
 </html>
