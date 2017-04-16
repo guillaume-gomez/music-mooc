@@ -61,7 +61,7 @@
     var con = new audio_context();
 
     var src_path = "../assets/src/";
-
+    var filenames = ["001_drum1.wav", "001_drum2.wav"];
     var sounds = [];
     var volumes = [0, 0];
     var MaxSounds = 2;
@@ -98,14 +98,14 @@
         })
     };
 
+    loadSamples();
 
-
-    loadSample(src_path + '001_drum1.wav', function (buffer){
-        sounds[0] = buffer;
-    });
-    loadSample(src_path + '001_drum2.wav', function (buffer){
-        sounds[1] = buffer;
-    });
+    // loadSample(src_path + '001_drum1.wav', function (buffer){
+    //     sounds[0] = buffer;
+    // });
+    // loadSample(src_path + '001_drum2.wav', function (buffer){
+    //     sounds[1] = buffer;
+    // });
 
 
 
@@ -187,6 +187,17 @@
             });
         };
         request.send();
+    }
+
+    function loadSamples() {
+      function generateAffectation(index) {
+        return function(buffer) {
+          sounds[index] = buffer;
+        }
+      }
+      filenames.forEach(function(filename, index) {
+        loadSample(src_path + filename, generateAffectation(index));
+      });
     }
 
 
