@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+  <title>Week 3 Challenge</title>
+  <script src="../assets/nexusUI.js"></script>
+</head>
+  <body style="background: #c8e6c9">
+    <nav class="navbar navbar-light bg-faded">
+      <h1 class="navbar-brand mb-0">Guillaume Gomez</h1>
+    </nav>
+    </br>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-9">
+          <div class="card">
+           <h3 class="card-header">Drum</h3>
+            <div class="card-block">
+              <div class="row">
+                <div class="col-md-10">
+                  <canvas id="matrix" nx="matrix" width="400"></canvas>
+                </div>
+                <div class="col-sm-2" style="border-left: solid 3px #e8e8ea;">
+                  
+                </div>
+                <div class="col-sm-12">
+                  <hr/>
+                  <canvas id="volume_hat_dial" nx="dial"  min="0" max="100"></canvas>
+                  <label>Label Hat</label>
+                  <canvas id="volume_snare_dial" nx="dial"  min="0" max="100"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="card">
+           <h3 class="card-header">BPM</h3>
+            <div class="card-block">
+              <div class="row">
+                 <canvas id="bpm_ui" nx="slider" max=1000 min=10></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br/>
+      <div class="row">
+        <div class="col-md-12">
+          <canvas nx="banner" class="text-center"></canvas>
+        </div>
+      </div>
+    </div>
+  </body>
+<script>
+
+    var audio_context = window.AudioContext || window.webkitAudioContext;
+    var con = new audio_context();
+
+    var src_path = "../assets/src/";
+
+    var sounds = [];
+    var volume_hat = 0;
+    var volume_snare = 0;
+
+    var seq = [
+        [0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0]
+    ];
+
+
+    var step = 0;
+    var interval = 0.125;
+    var matrix;
+    var volume_hat_dial;
+    var volume_snare_dial;
+    var bpm_ui;
+    debugger
+    nx.onload = function(){
+        matrix.col = seq[0].length;
+        matrix.row = seq.length;
+        matrix.init();
+
+        matrix.on('*', function(data) {
+            if (data.row !== undefined) {
+                seq[data.row][data.col] = data.level;
+            }
+        });
+
+        volume_hat_dial.on('*',function(data) {
+            volume_hat = data.value / 100;
+        });
+
+        volume_snare_dial.on('*',function(data) {
+            volume_snare = data.value / 100;
+        });
+
+        bpm_ui.on('*', function(data) {
+          interval = data.value / 1000;
+        });
+    };
+
+
+    loadSample(src_path + '001_drum1.wav', function (buffer){
+        sounds[0] = buffer;
+    });
+    loadSample(src_path + '001_drum2.wav', function (buffer){
+        sounds[1] = buffer;
+    });
+
+
+
+    function playSound(buffer, time, valVolume){
+        var player = con.createBufferSource();
+        var volume = con.createGain();
+        volume.gain.value = valVolume;
+        player.buffer = buffer;
+        player.loop = false;
+        player.connect (volume);
+        volume.connect(con.destination);
+        player.start(time);
+    }
+
+
+    // this code will wake up every (wait_time) ms
+    // and schedule a load of drum triggers on the clock
+    // each time, remembering where it scheduled to in the future
+    // so it does not repeat anything
+    var wait_time = 0.25;
+    var got_up_to;
+
+    setInterval(function(){
+        var now = con.currentTime;
+
+       matrix.jumpToCol(step % seq[0].length);
+
+        // how far into the future will we schedule?
+        // we schedule beyond the next wait time as we cannot
+        // rely on it being exactly 'wait_time' ms before
+        // we get woken up again, therefore put in a few
+        // extra events on the scheduler to cover any delays
+        var max_future_time = now + (wait_time  * 1.5);
+        if (got_up_to > now) {// already scheduled up to this point
+            now = got_up_to;
+        }
+
+        while (now <= max_future_time){
+            step ++;
+            if (seq[0][step % seq[0].length]){
+                playSound(sounds[0], now, volume_hat);
+            }
+
+            if (seq[1][step % seq[1].length]){
+                playSound(sounds[1], now, volume_snare);
+            }
+
+            now += interval ;
+        }
+        got_up_to = now;
+
+    }, wait_time * 1000);
+
+
+    function loadSample(url, callback){
+        var request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.responseType = 'arraybuffer';
+        request.onload = function(){
+            var audioData = request.response;
+            con.decodeAudioData(audioData, function(buffer) {
+                console.log(buffer);
+                callback(buffer);
+            });
+        };
+        request.send();
+    }
+</script>
+</html>
