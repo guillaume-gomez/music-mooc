@@ -28,8 +28,10 @@
                 <div class="col-sm-12">
                   <hr/>
                   <canvas id="volume_ui_1" nx="dial"  min="0" max="100"></canvas>
-                  <label>Label Hat</label>
                   <canvas id="volume_ui_2" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_3" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_4" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_5" nx="dial"  min="0" max="100"></canvas>
                 </div>
               </div>
             </div>
@@ -61,10 +63,10 @@
     var con = new audio_context();
 
     var src_path = "../assets/src/";
-    var filenames = ["001_drum1.wav", "001_drum2.wav"];
+    var filenames = ["001_drum1.wav", "001_drum2.wav", "004_VoodooTom.wav"];
     var sounds = [];
-    var volumes = [0, 0];
-    var MaxSounds = 2;
+    var volumes = filenames.map(function() { return 0;});
+    var MaxSounds = filenames.length;
     var seq = [];
 
 
@@ -94,7 +96,8 @@
         });
 
         nx.widgets.matrix_width.on('*', function(data) {
-          //setMatrixArray(data.value);
+          
+          setMatrixArray(data.value);
         })
     };
 
@@ -160,13 +163,18 @@
 
         while (now <= max_future_time){
             step++;
-            if (seq[0][step % seq[0].length]){
-                playSound(sounds[0], now, volumes[0]);
-            }
+            seq.forEach(function(val, index) {
+              if (val[step % val.length]){
+                playSound(sounds[index], now, volumes[index]);
+              }
+            })
+            // if (seq[0][step % seq[0].length]){
+            //     playSound(sounds[0], now, volumes[0]);
+            // }
 
-            if (seq[1][step % seq[1].length]){
-                playSound(sounds[1], now, volumes[1]);
-            }
+            // if (seq[1][step % seq[1].length]){
+            //     playSound(sounds[1], now, volumes[1]);
+            // }
 
             now += interval ;
         }
