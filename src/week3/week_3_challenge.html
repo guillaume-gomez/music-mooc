@@ -43,7 +43,7 @@
            <h3 class="card-header">BPM</h3>
             <div class="card-block">
               <div class="row">
-                 <canvas id="bpm_ui" nx="slider" max=1000 min=10></canvas>
+                 <canvas id="bpm_ui" nx="slider" max=500 min=10></canvas>
               </div>
             </div>
           </div>
@@ -91,29 +91,22 @@
         for(var i = 0; i < MaxSounds; i++) {
           nx.widgets["volume_ui_"+(i + 1)].on('*', generateHandler(i));
         }
+
+        nx.widgets.bpm_ui.set({value: interval * 1000})
         nx.widgets.bpm_ui.on('*', function(data) {
           interval = data.value / 1000;
         });
+
 
         var resetMatrix = function() {
           return function(data) {
             setMaxtrixArray(data.value);
           }
         }
-
         nx.widgets.matrix_width.on('*', resetMatrix());
     };
 
     loadSamples();
-
-    // loadSample(src_path + '001_drum1.wav', function (buffer){
-    //     sounds[0] = buffer;
-    // });
-    // loadSample(src_path + '001_drum2.wav', function (buffer){
-    //     sounds[1] = buffer;
-    // });
-
-
 
     function playSound(buffer, time, valVolume){
         var player = con.createBufferSource();
@@ -132,7 +125,8 @@
       for(var i = 0; i < MaxSounds; i++) {
         newSeq[i] = [];
         for(var j = 0; j < width; j++) {
-          newSeq[i][j] = 0;
+          var oldValue = seq[i] !== undefined && seq[i][j] !== undefined ? seq[i][j] : 0;
+          newSeq[i][j] = oldValue;
         }
       }
       seq = newSeq.slice();
