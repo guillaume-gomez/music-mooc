@@ -63,7 +63,7 @@
     var con = new audio_context();
 
     var src_path = "../assets/src/";
-    var filenames = ["001_drum1.wav", "001_drum2.wav", "004_VoodooTom.wav"];
+    var filenames = ["001_drum1.wav", "001_drum2.wav", "002_03.wav", "002_FX.wav", "004_VoodooTom.wav"];
     var sounds = [];
     var volumes = filenames.map(function() { return 0;});
     var MaxSounds = filenames.length;
@@ -96,8 +96,7 @@
         });
 
         nx.widgets.matrix_width.on('*', function(data) {
-          
-          setMatrixArray(data.value);
+          //setMatrixArray(data.value);
         })
     };
 
