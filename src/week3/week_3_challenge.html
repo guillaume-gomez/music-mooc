@@ -95,9 +95,13 @@
           interval = data.value / 1000;
         });
 
-        nx.widgets.matrix_width.on('*', function(data) {
-          //setMatrixArray(data.value);
-        })
+        var resetMatrix = function() {
+          return function(data) {
+            setMaxtrixArray(data.value);
+          }
+        }
+
+        nx.widgets.matrix_width.on('*', resetMatrix());
     };
 
     loadSamples();
@@ -167,14 +171,6 @@
                 playSound(sounds[index], now, volumes[index]);
               }
             })
-            // if (seq[0][step % seq[0].length]){
-            //     playSound(sounds[0], now, volumes[0]);
-            // }
-
-            // if (seq[1][step % seq[1].length]){
-            //     playSound(sounds[1], now, volumes[1]);
-            // }
-
             now += interval ;
         }
         got_up_to = now;
