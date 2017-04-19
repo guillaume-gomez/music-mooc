@@ -23,7 +23,7 @@
                   <canvas id="matrix" nx="matrix" width="600"></canvas>
                 </div>
                 <div class="col-sm-2" style="border-left: solid 3px #e8e8ea;">
-                  <canvas id="matrix_width" nx="slider" min=5 max=20 range=1></canvas>
+                  <canvas id="matrix_width" nx="slider" min=1 max=20></canvas>
                 </div>
                 <div class="col-sm-12">
                   <hr/>
@@ -43,7 +43,7 @@
            <h3 class="card-header">BPM</h3>
             <div class="card-block">
               <div class="row">
-                 <canvas id="bpm_ui" nx="slider" max=500 min=10></canvas>
+                 <canvas id="bpm_ui" nx="slider" max=300 min=30></canvas>
               </div>
             </div>
           </div>
@@ -71,7 +71,7 @@
 
 
     var step = 0;
-    var interval = 0.125;
+    var interval = 60/120;
     var matrix;
 
     nx.onload = function(){
@@ -92,9 +92,10 @@
           nx.widgets["volume_ui_"+(i + 1)].on('*', generateHandler(i));
         }
 
-        nx.widgets.bpm_ui.set({value: interval * 1000})
+        nx.widgets.bpm_ui.set({value: 120})
         nx.widgets.bpm_ui.on('*', function(data) {
-          interval = data.value / 1000;
+          interval = 60 / data.value ;
+          console.log(interval)
         });
 
 
@@ -140,7 +141,7 @@
     // and schedule a load of drum triggers on the clock
     // each time, remembering where it scheduled to in the future
     // so it does not repeat anything
-    var wait_time = 0.25;
+    var wait_time = 0.05;
     var got_up_to;
 
     setInterval(function(){
