@@ -1,0 +1,173 @@
+<body>
+    <div 
+        tabindex="0"
+        style="background:black; height:100%;"
+    >
+    <textarea
+        id="hat_editor"
+        onkeyup="updateHats()"
+    ></textarea>
+    <br>
+      <textarea
+        id="sn_editor"
+        onkeyup="updateSnare()"
+    ></textarea>
+
+
+    </div>
+    <br/>
+
+</body>
+
+<script>
+
+var audio_context = window.AudioContext || window.webkitAudioContext;
+var con = new audio_context();
+
+var comp = con.createDynamicsCompressor();
+var drum_gain = con.createGain();
+drum_gain.gain.value = 20;
+drum_gain.connect(comp);
+comp.connect(con.destination);
+
+var osc = con.createOscillator();
+osc.type = 'triangle';
+var osc_amp = con.createGain();
+osc_amp.gain.value = 0.1;
+osc.connect(osc_amp);
+
+
+var del = con.createDelay();
+osc_amp.connect(del);
+var fb = con.createGain();
+del.connect(fb);
+fb.connect(del);
+del.delayTime.value = 0.25;
+fb.gain.value = 0.75;
+
+del.connect(con.destination);
+
+//osc_amp.connect(con.destination);
+
+
+var freq = 200;
+osc.start();
+
+var hat;
+var snare; 
+var bd; 
+
+var hat_seq = [1, 0, 1,0,1,0];
+var sn_seq = [1, 0, 0.7,0,1];
+var bd_seq = [1, 0, 0];
+
+var step = 0;
+var interval = 0.125;
+
+
+loadSample('cl_hat_3001.wav', function (buffer){
+    hat = buffer; 
+});
+loadSample('brp_snrim1.wav', function (buffer){
+    snare = buffer; 
+});
+loadSample('bd08.wav', function (buffer){
+    bd = buffer; 
+});
+
+function  updateHats(){
+    var text = document.getElementById('hat_editor');
+    hat_seq = text.value.split(',');
+}
+
+function  updateSnare(){
+    var text = document.getElementById('sn_editor');
+    sn_seq = text.value.split(',');
+}
+
+
+
+function playSound(buffer, time){
+    var player = con.createBufferSource();
+    player.buffer = buffer;
+    player.loop = false;
+    player.start(time); 
+   // player.connect(con.destination);  
+    player.connect(drum_gain);
+    //player.connect(comp_pregain);
+    
+}
+
+
+function changeNote(when){
+    //freq = Math.random() * 500;
+    freq = freq * 1.5;
+    if (freq > 3000) {
+        freq = freq * 0.1;
+    }
+    
+    osc.frequency.value = freq;
+    osc.frequency.setValueAtTime(freq, when);
+}
+
+
+// this code will wake up every (wait_time) ms 
+// and schedule a load of drum triggers on the clock
+// each time, remembering where it scheduled to in the future
+// so it does not repeat anything
+var wait_time = 0.5;
+var got_up_to;
+
+setInterval(function(){
+    var now = con.currentTime;
+    // how far into the future will we schedule? 
+    // we schedule beyond the next wait time as we cannot 
+    // rely on it being exactly 'wait_time' ms before 
+    // we get woken up again, therefore put in a few
+    // extra events on the scheduler to cover any delays
+    var max_future_time = now + (wait_time  * 1.5);
+    if (got_up_to > now) {// already scheduled up to this point
+        now = got_up_to;
+    }
+    
+    while (now <= max_future_time){
+        step ++;
+        if (hat_seq[step % hat_seq.length] > Math.random()){
+   //     if (hat_seq[step % hat_seq.length]){
+            playSound(hat, now);
+        }
+        if (sn_seq[step % sn_seq.length] > Math.random()){
+       // if (sn_seq[step % sn_seq.length]){
+            playSound(snare, now);
+        }
+        if (bd_seq[step % bd_seq.length] > Math.random()){
+       // if (sn_seq[step % sn_seq.length]){
+            playSound(bd, now);
+        }
+        changeNote(now);
+        
+        
+        
+        now += interval;
+    }
+    got_up_to = now;
+    
+}, wait_time*1000);
+
+
+function loadSample(url, callback){
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+    request.onload = function(){
+        var audioData = request.response;
+        con.decodeAudioData(audioData, function(buffer) {
+            console.log(buffer);
+            callback(buffer);
+        });
+    };
+    request.send();
+}
+
+    
+</script>
