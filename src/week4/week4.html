@@ -19,10 +19,6 @@
            <h3 class="card-header">Drum</h3>
             <div class="card-block">
               <div class="row">
-                <div class="col-sm-2" style="border-right: solid 3px #e8e8ea;">
-                  <label> ON/OFF </label>
-                  <canvas id="on_off" nx="toggle"></canvas>
-                </div>
                 <div class="col-md-10">
                   <canvas id="matrix" nx="matrix" width="600"></canvas>
                 </div>
@@ -55,6 +51,20 @@
       </div>
       <br/>
       <div class="row">
+        <div class="col-md-9">
+          <div class="card">
+            <h3 class="card-header">Random</h3>
+            <div class="card-block">
+              <div class="col-sm-2" style="border-right: solid 3px #e8e8ea;">
+                <label> ON/OFF </label>
+                <canvas id="on_off" nx="toggle"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br/>
+      <div class="row">
         <div class="col-md-12">
           <canvas nx="banner" class="text-center"></canvas>
         </div>
@@ -62,6 +72,7 @@
     </div>
   </body>
 <script>
+
 
     var audio_context = window.AudioContext || window.webkitAudioContext;
     var con = new audio_context();
@@ -180,7 +191,6 @@
     }
 
     function changeNote(when){
-      //freq = Math.random() * 500;
       freq = freq * 1.5;
       if (freq > 3000) {
           freq = freq * 0.1;
