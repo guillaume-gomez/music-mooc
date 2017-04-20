@@ -14,94 +14,232 @@
     </br>
     <div class="container">
       <div class="row">
-        <div class="col-sm-7">
+        <div class="col-md-9">
           <div class="card">
-           <h3 class="card-header">Oscillator</h3>
+           <h3 class="card-header">Drum</h3>
             <div class="card-block">
               <div class="row">
-                <div class="col-sm-2" style="border-right: solid 3px #e8e8ea;">
-                  <label> ON/OFF </label>
-                  <canvas id="on_off" nx="toggle"></canvas>
+                <div class="col-md-10">
+                  <canvas id="matrix" nx="matrix" width="600"></canvas>
                 </div>
-                <div class="col-sm-8">
-                  <textarea
-                      id="hat_editor"
-                      onkeyup="updateHats()"
-                  ></textarea>
-                  <br>
-                    <textarea
-                      id="sn_editor"
-                      onkeyup="updateSnare()"
-                  ></textarea>
+                <div class="col-sm-2" style="border-left: solid 3px #e8e8ea;">
+                  <canvas id="matrix_width" nx="slider" min=1 max=20></canvas>
+                </div>
+                <div class="col-sm-12">
+                  <hr/>
+                  <canvas id="volume_ui_1" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_2" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_3" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_4" nx="dial"  min="0" max="100"></canvas>
+                  <canvas id="volume_ui_5" nx="dial"  min="0" max="100"></canvas>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <div class="col-md-3">
+          <div class="card">
+           <h3 class="card-header">BPM</h3>
+            <div class="card-block">
+              <div class="row">
+                 <canvas id="bpm_ui" nx="slider" max=300 min=30></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <br/>
+      <div class="row">
+        <div class="col-md-12">
+          <canvas nx="banner" class="text-center"></canvas>
+        </div>
       </div>
     </div>
   </body>
-
 <script>
+
     var audio_context = window.AudioContext || window.webkitAudioContext;
     var con = new audio_context();
 
-    // Encapsulate an oscillator
-    Oscillator = function(destination) {
-        this.oscillator = null;
-        this.createOscillator = function() {
-           this.oscillator = con.createOscillator();
-           this.oscillator.connect(destination);
+    var src_path = "../assets/src/";
+    var filenames = ["001_drum1.wav", "001_drum2.wav", "002_03.wav", "002_FX.wav", "004_VoodooTom.wav"];
+    var sounds = [];
+    var volumes = filenames.map(function() { return 0;});
+    var MaxSounds = filenames.length;
+    var seq = [];
+
+
+    var step = 0;
+    var interval = 60/120;
+    var matrix;
+
+    var comp = con.createDynamicsCompressor();
+    var drum_gain = con.createGain();
+    drum_gain.gain.value = 20;
+    drum_gain.connect(comp);
+    comp.connect(con.destination);
+
+    var osc = con.createOscillator();
+    osc.type = 'triangle';
+    var osc_amp = con.createGain();
+    osc_amp.gain.value = 0.1;
+    osc.connect(osc_amp);
+
+
+    var del = con.createDelay();
+    osc_amp.connect(del);
+    var fb = con.createGain();
+    del.connect(fb);
+    fb.connect(del);
+    del.delayTime.value = 0.25;
+    fb.gain.value = 0.75;
+
+    del.connect(con.destination);
+
+    var freq = 200;
+    osc.start();
+
+    var hat_seq = [1, 0, 1,0,1,0];
+    var sn_seq = [1, 0, 0.7,0,1];
+    var bd_seq = [1, 0, 0];
+
+    nx.onload = function(){
+        setMaxtrixArray(9);
+
+        matrix.on('*', function(data) {
+            if (data.row !== undefined) {
+                seq[data.row][data.col] = data.level;
+            }
+        });
+        //init volumes handler
+        function generateHandler(index) {
+          return function(data) {
+            volumes[index] = data.value / 100;
+          }
+        }
+        for(var i = 0; i < MaxSounds; i++) {
+          nx.widgets["volume_ui_"+(i + 1)].on('*', generateHandler(i));
         }
 
-        this.start = function () {
-          this.oscillator.start();
-        }
+        nx.widgets.bpm_ui.set({value: 120})
+        nx.widgets.bpm_ui.on('*', function(data) {
+          interval = 60 / data.value ;
+          console.log(interval)
+        });
 
-        this.stop = function() {
-          this.oscillator.stop();
-          this.createOscillator(destination);
-        }
 
-        this.ocs = function() {
-          return this.oscillator;
+        var resetMatrix = function() {
+          return function(data) {
+            setMaxtrixArray(data.value);
+          }
         }
+        nx.widgets.matrix_width.on('*', resetMatrix());
+    };
+
+    loadSamples();
+
+    function playSound(buffer, time, valVolume){
+        var player = con.createBufferSource();
+        var volume = con.createGain();
+        volume.gain.value = valVolume;
+        player.buffer = buffer;
+        player.loop = false;
+        player.connect (volume);
+        volume.connect(con.destination);
+        player.start(time);
     }
 
-    connnectToUi = function () {
-      let oscillator = new Oscillator(con.destination);
-      oscillator.createOscillator();
-      let analyser = con.createAnalyser();
-      oscillator.ocs().connect(analyser);
-      let lfo = con.createOscillator();
-      let lfo_amp = con.createGain();
-      //lfo_amp.gain.value = 200;
+    function changeNote(when){
+      //freq = Math.random() * 500;
+      freq = freq * 1.5;
+      if (freq > 3000) {
+          freq = freq * 0.1;
+      }
+      osc.frequency.value = freq;
+      osc.frequency.setValueAtTime(freq, when);
+    }
 
-      lfo.connect(lfo_amp);
-      lfo_amp.connect(oscillator.ocs().frequency);
-
-      let graph = new Analyser(oscillator.ocs());
-      graph.initAnalyser(analyser);
-      graph.drawer(analyser);
-
-      lfo.start();
-
-      const onOffOsc = (data) => {
-        if(data.value === 1) {
-          oscillator.start()
-        } else {
-          oscillator.stop();
-          oscillator.ocs().connect(analyser);
+    function setMaxtrixArray(width) {
+      var newSeq = [];
+      // init sequences
+      for(var i = 0; i < MaxSounds; i++) {
+        newSeq[i] = [];
+        for(var j = 0; j < width; j++) {
+          var oldValue = seq[i] !== undefined && seq[i][j] !== undefined ? seq[i][j] : 0;
+          newSeq[i][j] = oldValue;
         }
       }
-
-      //on page loaded
-      nx.onload = () => {
-        nx.widgets.on_off.on('*', onOffOsc);
-      };
+      seq = newSeq.slice();
+      matrix.col = seq[0].length;
+      matrix.row = seq.length;
+      matrix.init();
     }
 
 
-    connnectToUi();
-  </script>
+    // this code will wake up every (wait_time) ms
+    // and schedule a load of drum triggers on the clock
+    // each time, remembering where it scheduled to in the future
+    // so it does not repeat anything
+    var wait_time = 0.05;
+    var got_up_to;
+
+    setInterval(function(){
+        var now = con.currentTime;
+
+       matrix.jumpToCol(step % seq[0].length);
+
+        // how far into the future will we schedule?
+        // we schedule beyond the next wait time as we cannot
+        // rely on it being exactly 'wait_time' ms before
+        // we get woken up again, therefore put in a few
+        // extra events on the scheduler to cover any delays
+        var max_future_time = now + (wait_time  * 1.5);
+        if (got_up_to > now) {// already scheduled up to this point
+            now = got_up_to;
+        }
+
+        while (now <= max_future_time){
+            step++;
+            seq.forEach(function(val, index) {
+              if (val[step % val.length]){
+                playSound(sounds[index], now, volumes[index]);
+              }
+            })
+            changeNote(now);
+            now += interval ;
+        }
+        got_up_to = now;
+
+    }, wait_time * 1000);
+
+
+    function loadSample(url, callback){
+        var request = new XMLHttpRequest();
+        request.open('GET', url, true);
+        request.responseType = 'arraybuffer';
+        request.onload = function(){
+            var audioData = request.response;
+            con.decodeAudioData(audioData, function(buffer) {
+                console.log(buffer);
+                callback(buffer);
+            });
+        };
+        request.send();
+    }
+
+    function loadSamples() {
+      function generateAffectation(index) {
+        return function(buffer) {
+          sounds[index] = buffer;
+        }
+      }
+      filenames.forEach(function(filename, index) {
+        loadSample(src_path + filename, generateAffectation(index));
+      });
+    }
+
+
+
+</script>
 </html>
