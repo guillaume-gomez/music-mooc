@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+  <title>Week 4 Challenge</title>
+  <script src="../assets/nexusUI.js"></script>
+</head>
+  <body style="background: #c8e6c9">
+    <nav class="navbar navbar-light bg-faded">
+      <h1 class="navbar-brand mb-0">Guillaume Gomez</h1>
+    </nav>
+    </br>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-7">
+          <div class="card">
+           <h3 class="card-header">Oscillator</h3>
+            <div class="card-block">
+              <div class="row">
+                <div class="col-sm-2" style="border-right: solid 3px #e8e8ea;">
+                  <label> ON/OFF </label>
+                  <canvas id="on_off" nx="toggle"></canvas>
+                </div>
+                <div class="col-sm-8">
+                  <textarea
+                      id="hat_editor"
+                      onkeyup="updateHats()"
+                  ></textarea>
+                  <br>
+                    <textarea
+                      id="sn_editor"
+                      onkeyup="updateSnare()"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+<script>
+    var audio_context = window.AudioContext || window.webkitAudioContext;
+    var con = new audio_context();
+
+    // Encapsulate an oscillator
+    Oscillator = function(destination) {
+        this.oscillator = null;
+        this.createOscillator = function() {
+           this.oscillator = con.createOscillator();
+           this.oscillator.connect(destination);
+        }
+
+        this.start = function () {
+          this.oscillator.start();
+        }
+
+        this.stop = function() {
+          this.oscillator.stop();
+          this.createOscillator(destination);
+        }
+
+        this.ocs = function() {
+          return this.oscillator;
+        }
+    }
+
+    connnectToUi = function () {
+      let oscillator = new Oscillator(con.destination);
+      oscillator.createOscillator();
+      let analyser = con.createAnalyser();
+      oscillator.ocs().connect(analyser);
+      let lfo = con.createOscillator();
+      let lfo_amp = con.createGain();
+      //lfo_amp.gain.value = 200;
+
+      lfo.connect(lfo_amp);
+      lfo_amp.connect(oscillator.ocs().frequency);
+
+      let graph = new Analyser(oscillator.ocs());
+      graph.initAnalyser(analyser);
+      graph.drawer(analyser);
+
+      lfo.start();
+
+      const onOffOsc = (data) => {
+        if(data.value === 1) {
+          oscillator.start()
+        } else {
+          oscillator.stop();
+          oscillator.ocs().connect(analyser);
+        }
+      }
+
+      //on page loaded
+      nx.onload = () => {
+        nx.widgets.on_off.on('*', onOffOsc);
+      };
+    }
+
+
+    connnectToUi();
+  </script>
+</html>
