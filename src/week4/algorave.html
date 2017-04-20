@@ -64,15 +64,16 @@ var bd_seq = [1, 0, 0];
 var step = 0;
 var interval = 0.125;
 
+var src_path = "../assets/src/";
 
-loadSample('cl_hat_3001.wav', function (buffer){
-    hat = buffer; 
+loadSample(src_path + 'cl_hat_3001.wav', function (buffer){
+    hat = buffer;
 });
-loadSample('brp_snrim1.wav', function (buffer){
-    snare = buffer; 
+loadSample(src_path + 'brp_snrim1.wav', function (buffer){
+    snare = buffer;
 });
-loadSample('bd08.wav', function (buffer){
-    bd = buffer; 
+loadSample(src_path + 'bd08.wav', function (buffer){
+    bd = buffer;
 });
 
 function  updateHats(){
