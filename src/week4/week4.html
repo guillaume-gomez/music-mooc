@@ -55,9 +55,17 @@
           <div class="card">
             <h3 class="card-header">Random</h3>
             <div class="card-block">
-              <div class="col-sm-2" style="border-right: solid 3px #e8e8ea;">
-                <label> ON/OFF </label>
-                <canvas id="on_off" nx="toggle"></canvas>
+              <div class="row">
+                <div class="col-sm-2" style="border-right: solid 3px #e8e8ea;">
+                  <label> ON/OFF </label>
+                  <canvas id="on_off" nx="toggle"></canvas>
+                </div>
+                <div class="col-sm-10">
+                  <canvas id="melody_vol" nx="dial" label="Melody volume %" min="0" max="100"></canvas>
+                  <canvas id="delay" nx="dial" label="Delay (secs)" min="0" max="1"></canvas>
+                  <canvas id="feeedback" nx="dial"  label="FeedBack %" min="0" max="100"></canvas>
+                  <canvas id= "msMelody" nx="multislider" label="Melody Change Probabilities"></canvas>
+                </div>
               </div>
             </div>
           </div>
@@ -105,6 +113,8 @@
     var volumes = filenames.map(function() { return 0;});
     var MaxSounds = filenames.length;
     var seq = [];
+    var snare = null;
+    var sn_seq = [1, 0.1, 1, 1];
 
     var step = 0;
     var interval = 60/120;
@@ -136,6 +146,9 @@
 
     var freq = 200;
     loadSamples();
+    loadSample(src_path + 'brp_snrim1.wav', function (buffer){
+        snare = buffer;
+    });
 
     nx.onload = function(){
         setMaxtrixArray(9);
@@ -167,16 +180,39 @@
             setMaxtrixArray(data.value);
           }
         }
-        const onOffOsc = (data) => {
+
+        var onOffOsc = (data) => {
           if(data.value === 1) {
             oscillator.start()
           } else {
             oscillator.stop();
           }
         }
+        nx.widgets.feeedback.set({data: fb.gain.value});
+        var setFeedback = (data) => {
+          fb.gain.value = data.value / 100;
+        };
+
+        nx.widgets.delay.set({data: del.delayTime.value});
+        var setDelay = (data) => {
+          del.delayTime.value = data.value;
+        };
+
+        nx.widgets.melody_vol.set({data: osc_amp.gain.value});
+        var setMelodyVol = (data) => {
+          osc_amp.gain.value = data.value / 100;
+        };
+
+        nx.widgets.msMelody.setNumberOfSliders(8);
+        var updateSnare = (data) => {
+          sn_seq = data.list;
+        }
 
         nx.widgets.matrix_width.on('*', resetMatrix());
         nx.widgets.on_off.on('*', onOffOsc);
+        nx.widgets.feeedback.on('*', setFeedback);
+        nx.widgets.melody_vol.on('*', setMelodyVol);
+        nx.widgets.msMelody.on('*', updateSnare);
     };
 
     function playSound(buffer, time, valVolume){
@@ -239,6 +275,9 @@
         }
 
         while (now <= max_future_time){
+            if (sn_seq[step % sn_seq.length] > Math.random()){
+              playSound(snare, now, 1);
+            }
             step++;
             seq.forEach(function(val, index) {
               if (val[step % val.length]){
